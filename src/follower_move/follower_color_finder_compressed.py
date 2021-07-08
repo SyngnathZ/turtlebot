@@ -2,6 +2,7 @@
 # BEGIN ALL
 import rospy, cv2, cv_bridge
 from sensor_msgs.msg import CompressedImage
+from geometry_msgs.msg import Twist
 import numpy as np
 
 
@@ -40,6 +41,13 @@ def callback(data):
     width = 1200
     height = 800
     cv2.resizeWindow("window", int(width * (height - 80) / height), height - 80);
+    # BEGIN CONTROL
+    err = cx - w / 2
+    twist = Twist()
+    twist.linear.x = 0.1
+    twist.angular.z = -float(err) / 1000
+    cmd_vel_pub.publish(twist)
+    # END CONTROL
     cv2.imshow("window", cv_image)
     cv2.waitKey(3)
 
@@ -51,4 +59,6 @@ def showImage():
 
 
 if __name__ == '__main__':
+    global cmd_vel_pub
+    cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1) # Using global variant
     showImage()
